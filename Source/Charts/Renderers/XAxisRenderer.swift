@@ -23,7 +23,7 @@ open class XAxisRenderer: AxisRendererBase
     open override func computeAxis(min: Double, max: Double, inverted: Bool)
     {
         var min = min, max = max
-        
+
         if let transformer = self.transformer
         {
             // calculate the starting and entry point of the y-labels (depending on
@@ -32,7 +32,7 @@ open class XAxisRenderer: AxisRendererBase
             {
                 let p1 = transformer.valueForTouchPoint(CGPoint(x: viewPortHandler.contentLeft, y: viewPortHandler.contentTop))
                 let p2 = transformer.valueForTouchPoint(CGPoint(x: viewPortHandler.contentRight, y: viewPortHandler.contentTop))
-                
+
                 if inverted
                 {
                     min = Double(p2.x)
@@ -45,7 +45,7 @@ open class XAxisRenderer: AxisRendererBase
                 }
             }
         }
-        
+
         computeAxisValues(min: min, max: max)
     }
     
