@@ -150,7 +150,7 @@ open class AxisRendererBase: Renderer
         {
             // no forced count
         
-            var first = interval == 0.0 ? 0.0 : ceil(yMin / interval) * interval
+            var first = interval == 0.0 ? 0.0 : floor(yMin / interval) * interval
             
             if axis.centerAxisLabelsEnabled
             {
