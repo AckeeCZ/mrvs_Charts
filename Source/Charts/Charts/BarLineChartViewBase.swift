@@ -68,7 +68,7 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
 
     /// The left Y axis renderer. This is a read-write property so you can set your own custom renderer here.
     /// **default**: An instance of YAxisRenderer
-    @objc open lazy var leftYAxisRenderer = MervisYAxisRenderer(viewPortHandler: _viewPortHandler, yAxis: leftAxis, transformer: _leftAxisTransformer)
+    @objc open lazy var leftYAxisRenderer = MervisYAxisRenderer(transformer: _leftAxisTransformer, viewPortHandler: _viewPortHandler, yAxis: leftAxis)
 
     /// The right Y axis renderer. This is a read-write property so you can set your own custom renderer here.
     /// **default**: An instance of YAxisRenderer

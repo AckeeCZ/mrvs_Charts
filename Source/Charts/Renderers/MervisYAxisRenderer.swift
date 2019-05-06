@@ -12,16 +12,14 @@ import CoreGraphics
  * Custom renderer for [MervisYAxis] that may contain analog and digital data sets.
  */
 
-open class MervisYAxisRenderer: YAxisRenderer {
-//    let yAxis: MervisYAxis?
+@objc(ChartMervisYAxisRenderer)
+public class MervisYAxisRenderer: YAxisRenderer {
 
-    public init(viewPortHandler: ViewPortHandler, yAxis: MervisYAxis?, transformer: Transformer?)
-    {
-//        self.yAxis = yAxis
+    public init(transformer: Transformer?, viewPortHandler: ViewPortHandler, yAxis: YAxis?) {
         super.init(viewPortHandler: viewPortHandler, yAxis: yAxis, transformer: transformer)
     }
 
-    open override func computeAxisValues(min: Double, max: Double)
+    public override func computeAxisValues(min: Double, max: Double)
     {
         if let yAxis = axis as? MervisYAxis {
             super.computeAxisValues(min: Double(yAxis.axisMinAnalog), max: max)

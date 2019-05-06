@@ -20,11 +20,11 @@ public class MervisYAxis: YAxis
     public var digitalEntries = [(Double,String)]()
 
     /**
-     * The max Y value of analog part of the chart.
+     * The min Y value of analog part of the chart.
      */
-    var axisMinAnalog: Float = 0
+    public var axisMinAnalog: Double = 0
 
-    open override func getFormattedLabel(_ index: Int) -> String {
+    public override func getFormattedLabel(_ index: Int) -> String {
         // If the index of an entry is in digital entries range, format it as a value from digital entries
         let analogEntriesCount = entryCount - digitalEntries.count
 

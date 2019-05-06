@@ -20,11 +20,6 @@ open class YAxisRenderer: AxisRendererBase
         super.init(viewPortHandler: viewPortHandler, transformer: transformer, axis: yAxis)
     }
 
-    open override func computeAxisValues(min: Double, max: Double)
-    {
-        super.computeAxisValues(min: min, max: max)
-    }
-    
     /// draws the y-axis labels to the screen
     open override func renderAxisLabels(context: CGContext)
     {
@@ -57,7 +52,6 @@ open class YAxisRenderer: AxisRendererBase
                 textAlign = .left
                 xPos = viewPortHandler.offsetLeft + xoffset
             }
-            
         }
         else
         {
