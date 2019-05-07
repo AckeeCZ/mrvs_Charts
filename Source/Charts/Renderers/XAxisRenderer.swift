@@ -76,6 +76,65 @@ open class XAxisRenderer: AxisRendererBase
         xAxis.labelRotatedWidth = labelRotatedSize.width
         xAxis.labelRotatedHeight = labelRotatedSize.height
     }
+
+    public func computeRegions(min: Double, max: Double) {
+        var regions = [Region]()
+
+        let minDate = Date(timeIntervalSince1970: min)
+        let maxDate = Date(timeIntervalSince1970: max)
+
+        let calendar = Calendar.current
+
+        // Replace the hour (time) of both dates with 00:00
+        let date1 = calendar.startOfDay(for: minDate)
+        let date2 = calendar.startOfDay(for: maxDate)
+        let numberOfDays = calendar.dateComponents([.day], from: date1, to: date2).day ?? 1
+        var today = date1
+
+        var weekendDays = [Date]()
+
+        for i in 1...numberOfDays {
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
+
+            if calendar.isDateInWeekend(tomorrow) {
+                weekendDays.append(tomorrow)
+            }
+            today = tomorrow
+        }
+
+        weekendDays.forEach { date in
+            let start = calendar.startOfDay(for: date)
+
+            var components = DateComponents()
+            components.day = 1
+            components.second = -1
+            let end = calendar.date(byAdding: components, to: start)!
+
+            let region = Region(start: start.timeIntervalSince1970, end: end.timeIntervalSince1970)
+            regions.append(region)
+        }
+
+        guard let xAxis = self.axis as? XAxis else { return }
+
+        xAxis.regions = regions
+    }
+
+    public func renderRegions(context: CGContext) {
+        guard let xAxis = self.axis as? XAxis else { return }
+
+                xAxis.regions.forEach { region in
+                    var positionStart = CGPoint(x: region.start, y: 0.0)
+                    var positionEnd = CGPoint(x: region.end, y: 0.0)
+                    transformer?.pointValueToPixel(&positionStart)
+                    transformer?.pointValueToPixel(&positionEnd)
+
+                    // Create Rectangle
+                    let rect = CGRect(x: positionStart.x, y: 0, width: positionEnd.x-positionStart.x, height: viewPortHandler.contentHeight+50)
+                    context.addRect(rect)
+                    context.setFillColor(region.weekendColor)
+                }
+                context.drawPath(using: .fill)
+    }
     
     open override func renderAxisLabels(context: CGContext)
     {

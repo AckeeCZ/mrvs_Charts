@@ -12,6 +12,17 @@
 import Foundation
 import CoreGraphics
 
+public class Region {
+    var start: Double
+    var end: Double
+    let weekendColor = NSUIColor.lightGray.withAlphaComponent(0.5).cgColor
+
+    init(start: Double, end: Double) {
+        self.start = start
+        self.end = end
+    }
+}
+
 @objc(ChartXAxis)
 open class XAxis: AxisBase
 {
@@ -24,6 +35,8 @@ open class XAxis: AxisBase
         case topInside
         case bottomInside
     }
+
+    public var regions: [Region] = []
     
     /// width of the x-axis labels in pixels - this is automatically calculated by the `computeSize()` methods in the renderers
     @objc open var labelWidth = CGFloat(1.0)
