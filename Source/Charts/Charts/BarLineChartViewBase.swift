@@ -224,6 +224,8 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
         if clipDataToContentEnabled {
             context.clip(to: _viewPortHandler.contentRect)
         }
+
+        xAxisRenderer.renderRegions(context: context)
         renderer.drawData(context: context)
         
         // if highlighting is enabled
@@ -331,6 +333,8 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
                 min: _xAxis._axisMinimum,
                 max: _xAxis._axisMaximum,
                 inverted: false)
+
+            xAxisRenderer.computeRegions(min: _xAxis._axisMinimum, max: _xAxis._axisMaximum)
 
             if _legend !== nil
             {
