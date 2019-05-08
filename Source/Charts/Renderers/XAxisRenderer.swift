@@ -12,9 +12,30 @@
 import Foundation
 import CoreGraphics
 
+extension Date {
+    public func toLocalTime() -> Date {
+        let timezone = TimeZone.current
+        let seconds = TimeInterval(timezone.secondsFromGMT(for: self))
+        return Date(timeInterval: seconds, since: self)
+    }
+}
+
 @objc(ChartXAxisRenderer)
 open class XAxisRenderer: AxisRendererBase
 {
+
+    public class constant {
+        static let HOURS_DIVIDERS = [12, 6, 4, 3, 2, 1]
+        static let MINUTES_DIVIDERS = [30, 20, 15, 10, 5, 3, 2, 1]
+        static let SECONDS_DIVIDERS = [30, 20, 15, 10, 5, 3, 2, 1]
+    }
+
+    public var daysComponent = DateComponents()
+    public var hoursComponent = DateComponents()
+    public var minutesComponent = DateComponents()
+    public var secondsComponent = DateComponents()
+
+
     @objc public init(viewPortHandler: ViewPortHandler, xAxis: XAxis?, transformer: Transformer?)
     {
         super.init(viewPortHandler: viewPortHandler, transformer: transformer, axis: xAxis)
@@ -51,8 +72,105 @@ open class XAxisRenderer: AxisRendererBase
     
     open override func computeAxisValues(min: Double, max: Double)
     {
-        super.computeAxisValues(min: min, max: max)
-        
+        guard let xAxis = self.axis as? XAxis else { return }
+        /*
+         Custom values compute. Aimed to show reasonable time intervals with round values.
+         */
+        let minSeconds = min
+        let maxSeconds = max
+        var entries = [Double]()
+        let labelCount = xAxis.labelCount
+        let minInstant = Date(timeIntervalSinceNow: minSeconds)
+        let maxInstant = Date(timeIntervalSinceNow: maxSeconds)
+
+        let calendar = Calendar.current
+        let daysBetweenDays = calendar.dateComponents([.day], from: minInstant, to: maxInstant).day ?? 1
+        let daysInInterval = daysBetweenDays + 1 // plus today
+        let hoursInInterval = calendar.dateComponents([.hour], from: minInstant, to: maxInstant).hour ?? 1
+        let minutesInInterval = calendar.dateComponents([.minute], from: minInstant, to: maxInstant).minute ?? 1
+        let secondsInInterval = calendar.dateComponents([.second], from: minInstant, to: maxInstant).second ?? 1
+        let zone = calendar.timeZone
+
+        if daysInInterval >= labelCount {
+            let daysGranularity = daysInInterval / labelCount
+
+            let date = Date(timeIntervalSince1970: minSeconds)
+            let start = calendar.startOfDay(for: date)
+
+            let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
+            let plusDays = Int(ceil(Double(dayOfYear) / Double(daysGranularity))) * daysGranularity - dayOfYear
+
+            daysComponent.day = plusDays
+
+            var dayToShow = calendar.date(byAdding: daysComponent, to: start)!
+
+            while dayToShow < maxInstant {
+                entries.append(dayToShow.timeIntervalSince1970)
+                daysComponent.day = daysGranularity
+                dayToShow = calendar.date(byAdding: daysComponent, to: dayToShow)!
+            }
+        } else if hoursInInterval >= labelCount {
+            // define static granularity as factor of hours count in a day to prevent labels jumping when scrolling through hours
+            let hoursGranularity = constant.HOURS_DIVIDERS.first { hoursInInterval / labelCount >= $0 } ?? 1
+
+            let date = Date(timeIntervalSince1970: minSeconds)
+            let hour = calendar.component(.hour, from: date)
+            let zeroDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: date)!
+
+            let plusHours = Int(ceil(Double(hour) / Double(hoursGranularity))) * hoursGranularity - hour
+
+            hoursComponent.hour = plusHours
+
+            var hourToShow = calendar.date(byAdding: hoursComponent, to: zeroDate)!
+
+            while hourToShow < maxInstant {
+                entries.append(hourToShow.timeIntervalSince1970)
+                hoursComponent.hour = hoursGranularity
+                hourToShow = calendar.date(byAdding: hoursComponent, to: hourToShow)!
+            }
+
+        } else if minutesInInterval >= labelCount {
+            // define static granularity as factor of minutes count in an hour to prevent labels jumping when scrolling through hours
+            let minutesGranularity = constant.MINUTES_DIVIDERS.first { minutesInInterval / labelCount >= $0 } ?? 1
+
+            let date = Date(timeIntervalSince1970: minSeconds)
+            let hour = calendar.component(.hour, from: date)
+            let minute = calendar.component(.minute, from: date)
+            let zeroDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date)!
+
+            let plusMinutes = Int(ceil(Double(minute) / Double(minutesGranularity))) * minutesGranularity - minute
+
+            minutesComponent.minute = plusMinutes
+
+            var minuteToShow = calendar.date(byAdding: minutesComponent, to: zeroDate)!
+
+            while minuteToShow < maxInstant {
+                entries.append(minuteToShow.timeIntervalSince1970)
+                minutesComponent.minute = minutesGranularity
+                minuteToShow = calendar.date(byAdding: minutesComponent, to: minuteToShow)!
+            }
+
+        } else {
+            let secondsGranularity = constant.SECONDS_DIVIDERS.first { secondsInInterval / labelCount >= $0 } ?? 1
+
+            let date = Date(timeIntervalSince1970: minSeconds)
+            let second = calendar.component(.second, from: date)
+
+            let plusSeconds = Int(ceil(Double(second) / Double(secondsGranularity))) * secondsGranularity - second
+
+            secondsComponent.second = plusSeconds
+
+            var secondToShow = calendar.date(byAdding: secondsComponent, to: date)!
+
+            while secondToShow < maxInstant {
+                entries.append(secondToShow.timeIntervalSince1970)
+                secondsComponent.second = secondsGranularity
+                secondToShow = calendar.date(byAdding: secondsComponent, to: secondToShow)!
+            }
+        }
+
+        xAxis.entries = entries
+
         computeSize()
     }
     
@@ -88,17 +206,18 @@ open class XAxisRenderer: AxisRendererBase
         // Replace the hour (time) of both dates with 00:00
         let date1 = calendar.startOfDay(for: minDate)
         let date2 = calendar.startOfDay(for: maxDate)
-        let numberOfDays = calendar.dateComponents([.day], from: date1, to: date2).day ?? 1
-        var today = date1
+        let daysBetweenDays = calendar.dateComponents([.day], from: date1, to: date2).day ?? 1
+        let numberOfDays = daysBetweenDays + 1 // plus today
 
+        var today = date1
         var weekendDays = [Date]()
 
         for i in 1...numberOfDays {
-            let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
-
-            if calendar.isDateInWeekend(tomorrow) {
-                weekendDays.append(tomorrow)
+            if calendar.isDateInWeekend(today) {
+                weekendDays.append(today)
             }
+
+            let tomorrow = calendar.date(byAdding: .day, value: 1, to: today)!
             today = tomorrow
         }
 
@@ -132,8 +251,8 @@ open class XAxisRenderer: AxisRendererBase
                     let rect = CGRect(x: positionStart.x, y: 0, width: positionEnd.x-positionStart.x, height: viewPortHandler.contentHeight+50)
                     context.addRect(rect)
                     context.setFillColor(region.weekendColor)
+                    context.drawPath(using: .fill)
                 }
-                context.drawPath(using: .fill)
     }
     
     open override func renderAxisLabels(context: CGContext)
