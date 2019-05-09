@@ -92,6 +92,7 @@ open class XAxisRenderer: AxisRendererBase
         let zone = calendar.timeZone
 
         if daysInInterval >= labelCount {
+            // define static granularity as factor of days count in a month to prevent labels jumping when scrolling through days
             let daysGranularity = daysInInterval / labelCount
 
             let date = Date(timeIntervalSince1970: minSeconds)
@@ -151,6 +152,7 @@ open class XAxisRenderer: AxisRendererBase
             }
 
         } else {
+            // define static granularity as factor of seconds count in a minute to prevent labels jumping when scrolling through hours
             let secondsGranularity = constant.SECONDS_DIVIDERS.first { secondsInInterval / labelCount >= $0 } ?? 1
 
             let date = Date(timeIntervalSince1970: minSeconds)
