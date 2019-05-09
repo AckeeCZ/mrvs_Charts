@@ -149,27 +149,18 @@ open class XAxisRenderer: AxisRendererBase
         } else {
             // define static granularity as factor of seconds count in a minute to prevent labels jumping when scrolling through hours
             let secondsGranularity = constant.SECONDS_DIVIDERS.first { secondsInInterval / labelCount >= $0 } ?? 1
+            let date = minSeconds
 
-            let date = Date(timeIntervalSince1970: minSeconds)
-            let second = calendar.component(.second, from: date)
+            let plusSeconds = Int(ceil(Double(minSeconds) / Double(secondsGranularity))) * secondsGranularity - Int(minSeconds)
+            var secondToShow = minSeconds + Double(plusSeconds)
 
-            let plusSeconds = Int(ceil(Double(second) / Double(secondsGranularity))) * secondsGranularity - second
-
-            secondsComponent.second = plusSeconds
-
-            var secondToShow = calendar.date(byAdding: secondsComponent, to: date)!
-
-            var secondToShow = second + Double(plusSeconds)
-
-            while secondToShow < maxInstant {
-                entries.append(secondToShow.timeIntervalSince1970)
-                secondsComponent.second = secondsGranularity
-                secondToShow = calendar.date(byAdding: secondsComponent, to: secondToShow)!
+            while secondToShow < maxSeconds {
+                entries.append(secondToShow)
+                secondToShow = secondToShow + Double(secondsGranularity)
             }
         }
 
         xAxis.entries = entries
-
         computeSize()
     }
     
