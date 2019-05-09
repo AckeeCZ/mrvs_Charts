@@ -12,6 +12,7 @@
 import Foundation
 import CoreGraphics
 
+
 extension Date {
     public func toLocalTime() -> Date {
         let timezone = TimeZone.current
@@ -69,7 +70,7 @@ open class XAxisRenderer: AxisRendererBase
 
         computeAxisValues(min: min, max: max)
     }
-    
+
     open override func computeAxisValues(min: Double, max: Double)
     {
         guard let xAxis = self.axis as? XAxis else { return }
@@ -94,63 +95,57 @@ open class XAxisRenderer: AxisRendererBase
         if daysInInterval >= labelCount {
             // define static granularity as factor of days count in a month to prevent labels jumping when scrolling through days
             let daysGranularity = daysInInterval / labelCount
+            let daysGranulatiryInSeconds = Double(daysGranularity * 86400)
 
             let date = Date(timeIntervalSince1970: minSeconds)
-            let start = calendar.startOfDay(for: date)
+            let startOfDayInSeconds = calendar.startOfDay(for: date).timeIntervalSince1970
 
             let dayOfYear = calendar.ordinality(of: .day, in: .year, for: date) ?? 1
             let plusDays = Int(ceil(Double(dayOfYear) / Double(daysGranularity))) * daysGranularity - dayOfYear
 
-            daysComponent.day = plusDays
+            var dayToShow = startOfDayInSeconds + Double(plusDays * 86400)
 
-            var dayToShow = calendar.date(byAdding: daysComponent, to: start)!
-
-            while dayToShow < maxInstant {
-                entries.append(dayToShow.timeIntervalSince1970)
-                daysComponent.day = daysGranularity
-                dayToShow = calendar.date(byAdding: daysComponent, to: dayToShow)!
+            while dayToShow < maxSeconds {
+                entries.append(dayToShow)
+                dayToShow = dayToShow + daysGranulatiryInSeconds
             }
         } else if hoursInInterval >= labelCount {
             // define static granularity as factor of hours count in a day to prevent labels jumping when scrolling through hours
             let hoursGranularity = constant.HOURS_DIVIDERS.first { hoursInInterval / labelCount >= $0 } ?? 1
+            let hoursGranularityInSeconds = Double(hoursGranularity * 3600)
 
             let date = Date(timeIntervalSince1970: minSeconds)
             let hour = calendar.component(.hour, from: date)
             let zeroDate = calendar.date(bySettingHour: hour, minute: 0, second: 0, of: date)!
+            let zeroDateInSeconds = zeroDate.timeIntervalSince1970
 
             let plusHours = Int(ceil(Double(hour) / Double(hoursGranularity))) * hoursGranularity - hour
 
-            hoursComponent.hour = plusHours
+            var hourToShow = zeroDateInSeconds + Double(plusHours)
 
-            var hourToShow = calendar.date(byAdding: hoursComponent, to: zeroDate)!
-
-            while hourToShow < maxInstant {
-                entries.append(hourToShow.timeIntervalSince1970)
-                hoursComponent.hour = hoursGranularity
-                hourToShow = calendar.date(byAdding: hoursComponent, to: hourToShow)!
+            while hourToShow < maxSeconds {
+                entries.append(hourToShow)
+                hourToShow = hourToShow + hoursGranularityInSeconds
             }
-
         } else if minutesInInterval >= labelCount {
             // define static granularity as factor of minutes count in an hour to prevent labels jumping when scrolling through hours
             let minutesGranularity = constant.MINUTES_DIVIDERS.first { minutesInInterval / labelCount >= $0 } ?? 1
+            let minutesGranularityInSeconds = Double(minutesGranularity * 60)
 
             let date = Date(timeIntervalSince1970: minSeconds)
             let hour = calendar.component(.hour, from: date)
             let minute = calendar.component(.minute, from: date)
             let zeroDate = calendar.date(bySettingHour: hour, minute: minute, second: 0, of: date)!
+            let zeroDateInSeconds = zeroDate.timeIntervalSince1970
 
             let plusMinutes = Int(ceil(Double(minute) / Double(minutesGranularity))) * minutesGranularity - minute
 
-            minutesComponent.minute = plusMinutes
+            var minuteToShow = zeroDateInSeconds + Double(plusMinutes)
 
-            var minuteToShow = calendar.date(byAdding: minutesComponent, to: zeroDate)!
-
-            while minuteToShow < maxInstant {
-                entries.append(minuteToShow.timeIntervalSince1970)
-                minutesComponent.minute = minutesGranularity
-                minuteToShow = calendar.date(byAdding: minutesComponent, to: minuteToShow)!
+            while minuteToShow < maxSeconds {
+                entries.append(minuteToShow)
+                minuteToShow = minuteToShow + minutesGranularityInSeconds
             }
-
         } else {
             // define static granularity as factor of seconds count in a minute to prevent labels jumping when scrolling through hours
             let secondsGranularity = constant.SECONDS_DIVIDERS.first { secondsInInterval / labelCount >= $0 } ?? 1
@@ -163,6 +158,8 @@ open class XAxisRenderer: AxisRendererBase
             secondsComponent.second = plusSeconds
 
             var secondToShow = calendar.date(byAdding: secondsComponent, to: date)!
+
+            var secondToShow = second + Double(plusSeconds)
 
             while secondToShow < maxInstant {
                 entries.append(secondToShow.timeIntervalSince1970)
