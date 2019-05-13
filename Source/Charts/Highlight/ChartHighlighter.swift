@@ -178,3 +178,15 @@ open class ChartHighlighter : NSObject, IHighlighter
         return chart?.data
     }
 }
+
+/*
+ In Mervis we aren't highlighting particular data set, but all of them (the whole chart), that's
+ why Y value and dataset index aren't relevant for us, only [xVal]
+ */
+
+public class MervisChartHighlighter: ChartHighlighter {
+    public override func getHighlight(xValue xVal: Double, x: CGFloat, y: CGFloat) -> Highlight? {
+        return Highlight(x: xVal.rounded(), y: 0.0, dataSetIndex: 0)
+    }
+
+}
