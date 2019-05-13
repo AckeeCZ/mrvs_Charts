@@ -693,13 +693,9 @@ open class LineChartRenderer: LineRadarRenderer
                 , set.isHighlightEnabled
                 else { continue }
             
-            guard let e = set.entryForXValue(high.x, closestToY: high.y) else { continue }
-            
-            if !isInBoundsX(entry: e, dataSet: set)
-            {
+            if !set.isHighlightEnabled {
                 continue
             }
-        
             context.setStrokeColor(set.highlightColor.cgColor)
             context.setLineWidth(set.highlightLineWidth)
             if set.highlightLineDashLengths != nil
@@ -721,8 +717,9 @@ open class LineChartRenderer: LineRadarRenderer
             
             let trans = dataProvider.getTransformer(forAxis: set.axisDependency)
             
-            let pt = trans.pixelForValues(x: x, y: y)
-            
+//            let pt = trans.pixelForValues(x: x, y: y)
+            let pt = trans.pixelForValues(x: x, y: 0)
+
             high.setDraw(pt: pt)
             
             // draw the lines
