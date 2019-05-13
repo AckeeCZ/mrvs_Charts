@@ -121,7 +121,7 @@ open class XAxisRenderer: AxisRendererBase
 
             let plusHours = Int(ceil(Double(hour) / Double(hoursGranularity))) * hoursGranularity - hour
 
-            var hourToShow = zeroDateInSeconds + Double(plusHours)
+            var hourToShow = zeroDateInSeconds + Double(plusHours*3600)
 
             while hourToShow < maxSeconds {
                 entries.append(hourToShow)
@@ -140,7 +140,7 @@ open class XAxisRenderer: AxisRendererBase
 
             let plusMinutes = Int(ceil(Double(minute) / Double(minutesGranularity))) * minutesGranularity - minute
 
-            var minuteToShow = zeroDateInSeconds + Double(plusMinutes)
+            var minuteToShow = zeroDateInSeconds + Double(plusMinutes*60)
 
             while minuteToShow < maxSeconds {
                 entries.append(minuteToShow)
@@ -190,7 +190,6 @@ open class XAxisRenderer: AxisRendererBase
 
         let minDate = Date(timeIntervalSince1970: min)
         let maxDate = Date(timeIntervalSince1970: max)
-
         let calendar = Calendar.current
 
         // Replace the hour (time) of both dates with 00:00
