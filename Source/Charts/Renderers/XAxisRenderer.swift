@@ -74,7 +74,7 @@ open class XAxisRenderer: AxisRendererBase
     open override func computeAxisValues(min: Double, max: Double)
     {
         guard let xAxis = self.axis as? XAxis else { return }
-        /*
+      /*
          Custom values compute. Aimed to show reasonable time intervals with round values.
          */
         let minSeconds = min

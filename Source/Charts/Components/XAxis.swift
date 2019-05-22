@@ -15,7 +15,7 @@ import CoreGraphics
 public class Region {
     var start: Double
     var end: Double
-    let weekendColor = NSUIColor.lightGray.withAlphaComponent(0.5).cgColor
+    let weekendColor = NSUIColor.init(red: 0, green: 0, blue: 0, alpha: 0.06).cgColor
 
     init(start: Double, end: Double) {
         self.start = start
