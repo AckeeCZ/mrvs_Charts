@@ -13,7 +13,7 @@ import Foundation
 import CoreGraphics
 
 /// Base-class of LineChart, BarChart, ScatterChart and CandleStickChart.
-open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartDataProvider, NSUIGestureRecognizerDelegate
+public class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartDataProvider, NSUIGestureRecognizerDelegate
 {
     /// the maximum number of entries to which values will be drawn
     /// (entry numbers greater than this value will cause value-labels to disappear)
@@ -632,7 +632,11 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
             let isZoomingOut = (recognizer.nsuiScale < 1)
             var canZoomMoreX = isZoomingOut ? _viewPortHandler.canZoomOutMoreX : _viewPortHandler.canZoomInMoreX
             var canZoomMoreY = isZoomingOut ? _viewPortHandler.canZoomOutMoreY : _viewPortHandler.canZoomInMoreY
-            
+
+            if highestVisibleX - lowestVisibleX < 300 && !isZoomingOut {
+                canZoomMoreX = false
+            }
+
             if _isScaling
             {
                 canZoomMoreX = canZoomMoreX && _scaleXEnabled && (_gestureScaleAxis == .both || _gestureScaleAxis == .x)
@@ -1937,7 +1941,7 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
     }
     
     /// The lowest x-index (value on the x-axis) that is still visible on he chart.
-    open var lowestVisibleX: Double
+    public var lowestVisibleX: Double
     {
         var pt = CGPoint(
             x: viewPortHandler.contentLeft,
@@ -1949,7 +1953,7 @@ open class BarLineChartViewBase: ChartViewBase, BarLineScatterCandleBubbleChartD
     }
     
     /// The highest x-index (value on the x-axis) that is still visible on the chart.
-    open var highestVisibleX: Double
+    public var highestVisibleX: Double
     {
         var pt = CGPoint(
             x: viewPortHandler.contentRight,

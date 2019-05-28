@@ -13,7 +13,7 @@ import Foundation
 import CoreGraphics
 
 /// Chart that draws bars.
-open class BarChartView: BarLineChartViewBase, BarChartDataProvider
+public class BarChartView: BarLineChartViewBase, BarChartDataProvider
 {
     /// if set to true, all values are drawn above their bars, instead of below their top
     private var _drawValueAboveBarEnabled = true
