@@ -367,6 +367,7 @@ open class LineChartRenderer: LineRadarRenderer
             
             // get the color that is set for this line-segment
             context.setStrokeColor(dataSet.color(atIndex: j).cgColor)
+            context.setFillColor(dataSet.color(atIndex: j).cgColor)
             context.strokeLineSegments(between: _lineSegments)
         }
         
